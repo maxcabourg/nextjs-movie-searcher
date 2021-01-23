@@ -1,65 +1,70 @@
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import Layout from '../components/Layout';
+import MoviePreview from '../components/MoviePreview';
+import SearchForm from '../components/SearchForm';
+import { searchMovies } from '../lib/movies';
 
 export default function Home() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [movies, setMovies] = useState([]);
+  const [page, setPage] = useState(1);
+  const [moviesLength, setMoviesLength] = useState(0);
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchMoreMovies();
+    }
+  }, [page])
+
+  const onSearch = async (title) => {
+    setSearchTerm(title);
+    setPage(1);
+    const movies = await searchMovies(title);
+    setMovies(movies.Search);
+    setMoviesLength(movies.totalResults);
+  }
+
+  const fetchMoreMovies = async () => {
+    console.log(page);
+    const newMovies = await searchMovies(searchTerm, page);
+    console.log([...movies, ...newMovies.Search]);
+    setMovies([...movies, ...newMovies.Search]);
+  }
+
   return (
-    <div className={styles.container}>
+    <Layout>
       <Head>
         <title>Create Next App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+      <main>
+        <h1>Search movies</h1>
+        <div className="flex justify-center px-8">
+          <SearchForm onSubmit={onSearch} />
         </div>
+
+        <section id="movies">
+          {movies.length > 0 &&
+          <InfiniteScroll
+            dataLength={movies.length}
+            next={() => setPage(page + 1)}
+            hasMore={page * 10 < moviesLength}>
+            <ul className="flex flex-wrap justify-evenly items-end">
+              {movies.map(movie => (
+                <li key={movie.imdbID}>
+                  <MoviePreview movie={movie} />
+                </li>
+              ))}
+            </ul>
+          </InfiniteScroll>
+          }
+          
+        </section>
       </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+    </Layout>
   )
 }
