@@ -1,14 +1,15 @@
-import React from 'react'
+import React from "react";
+import Link from "next/link";
 
 export default function Layout({ children }) {
   return (
-    <div>
-      <header className="bg-blue-600 h-80 flex items-center">
-        <span className="text-white text-xl font-semibold">Movie searcher</span>
+    <>
+      <header className="bg-blue-600 h-80 flex items-center pl-5">
+        <Link href="/">
+          <a className="text-white text-xl font-semibold">Movie searcher</a>
+        </Link>
       </header>
-      <div className="container px-8 mx-auto">
-        {children}
-      </div>
-    </div>
-  )
+      <div className="container px-8 mx-auto mt-8">{children}</div>
+    </>
+  );
 }
