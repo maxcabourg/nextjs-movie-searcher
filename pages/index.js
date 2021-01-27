@@ -28,9 +28,7 @@ export default function Home() {
   };
 
   const fetchMoreMovies = async () => {
-    console.log(page);
     const newMovies = await searchMovies(searchTerm, page);
-    console.log([...movies, ...newMovies.Search]);
     setMovies([...movies, ...newMovies.Search]);
   };
 
@@ -71,3 +69,5 @@ export default function Home() {
     </Layout>
   );
 }
+
+export async function getInitialProps() {}
